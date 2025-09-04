@@ -1,10 +1,8 @@
 package com.example.myapplication
 
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,26 +20,23 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,23 +47,37 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+data class notas(var status: Boolean, val texto: String)
+
 @Composable
 fun TelaBlocoDeNotas(){
 
-    var listaNotas = remember{ mutableListOf("Android", "Teste", "Mais um...") }
+    var listaNotas = remember{
+            mutableStateListOf(
+                notas(false, "Android"),
+                notas(false, "Android"),
+                notas(false, "Android"),
 
-    Column {
+        )}
+
+
+    Column (modifier = Modifier.fillMaxSize()){
         Cabecalho()
         Spacer(modifier = Modifier.height(5.dp))
 
         Spacer(modifier = Modifier.height(5.dp))
-        Formulario()
+        Formulario(onClickReturnText = {
+            textoNota ->
+            listaNotas.add(notas(false, textoNota))
+        })
 
         LazyColumn{
 
             items(listaNotas){
                 nota ->
-                Nota(nota)
+                Nota(nota, onClickRemove = {
+                    listaNotas.remove(nota)
+                })
                 Spacer(modifier = Modifier.height(5.dp))
             }
         }
@@ -121,9 +130,9 @@ fun Cabecalho(){
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
+//@Preview
 @Composable
-fun Formulario(){
+fun Formulario(onClickReturnText: (String) -> Unit){
 
         var texto = remember{
             mutableStateOf("tarefa...")
@@ -132,7 +141,11 @@ fun Formulario(){
         Row(){
             TextField(value = texto.value, onValueChange = {texto.value = it})
 
-            Button(onClick = { }) {
+            Button(onClick = {
+
+                onClickReturnText(texto.value)
+                texto.value =""
+            }) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Icon add"
@@ -144,12 +157,14 @@ fun Formulario(){
 
 }
 
-@Preview
+//@Preview
 @Composable
-fun Nota(textinho: String = "em branco"){
+fun Nota(nota: notas, onClickRemove: (notas) -> Unit){
 
     Card(
-        modifier = Modifier.fillMaxWidth().height(50.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
     ){
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -167,9 +182,17 @@ fun Nota(textinho: String = "em branco"){
             Spacer(modifier = Modifier.width(5.dp))
 
             Text (
-                text = textinho,
+                text = nota.texto,
                 style = MaterialTheme.typography.titleLarge
             )
+
+            Button(onClick = {
+                    onClickRemove(notas.status =true)
+            }) {
+
+
+                Text("X")
+            })
         }
     }
 
